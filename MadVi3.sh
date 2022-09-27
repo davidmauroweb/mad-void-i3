@@ -29,7 +29,7 @@ fi
 #base grafica
 sudo xbps-install -Sy at-spi2-core base-devel p7zip xdg-user-dirs NetworkManager network-manager-applet xorg xinit gvfs elogind lxdm nano htop neofetch pluma xarchiver octoxbps xtools
 echo "intalacion de i3"
-sudo xbps-install -Sy i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-font-ttf
+sudo xbps-install -Sy i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf
 echo "Software extra"
 sudo xbps-install -Sy xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot
 
@@ -160,10 +160,11 @@ cd $rt
 sudo cp lxdm.conf /etc/lxdm/
 mkdir ~/Fondosvs
 cp bg* ~/Fondosvs/
+sudo mkdir /usr/share/backgrounds
 sudo cp bg* /usr/share/backgrounds/
 cp nanorc ~/.nanorc
-cp config/i3 ~/.config
-cp config/rofi ~/.config
+cp config/i3 ~/.config -R
+cp config/rofi ~/.config -R
 sudo ln -s /etc/sv/dbus /var/service/
 sudo ln -s /etc/sv/NetworkManager /var/service/
 sudo ln -s /etc/sv/elogind /var/service/
