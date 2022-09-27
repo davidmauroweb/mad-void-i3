@@ -1,0 +1,1 @@
+exec --no-startup-id xautolock -time 1 -locker "~/.config/i3/scripts/blur-lock"

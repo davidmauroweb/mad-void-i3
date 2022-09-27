@@ -1,0 +1,3 @@
+killall feh
+#feh --recursive --bg-fill --randomize $HOME/Fondosvs &
+feh --bg-fill --randomize $HOME/Fondosvs/

@@ -1,0 +1,3 @@
+killall xautolock
+sleep $1m
+xautolock -time 1 -locker  "~/.config/i3/scripts/blur-lock" &

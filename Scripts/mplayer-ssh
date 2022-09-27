@@ -1,0 +1,1 @@
+ssh -X david@192.168.88.117 cat p2p/PL/1sc/masaje.mp4 | mplayer -
