@@ -169,8 +169,8 @@ bindcode $mod+Shift+90 	 move container to workspace  $ws10
 ######################################
 
 # start a terminal
-bindsym $mod+Return exec mate-terminal
-bindsym $mod+$alt+Return exec xterm -bg black -fn 9x15 -foreground green
+# bindsym $mod+$alt+Return exec mate-terminal # descomentar si se instala un terminal para tiling
+bindsym $mod+Return exec xterm -bg black -fn 9x15 -foreground green # xterm se ejecuta flotante
 
 # kill focused window
 bindsym $mod+q kill
