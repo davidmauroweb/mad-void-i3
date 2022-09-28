@@ -255,8 +255,8 @@ bindsym $mod+Shift+n exec ~/.config/i3/scripts/empty_workspace
 ## Multimedia Keys
 
 # volume
-bindsym XF86AudioRaiseVolume exec amixer -D pulse sset Master 5%+ && pkill -RTMIN+1 i3blocks
-bindsym XF86AudioLowerVolume exec amixer -D pulse sset Master 5%- && pkill -RTMIN+1 i3blocks
+bindsym XF86AudioRaiseVolume exec amixer -D default sset Master 5%+ && pkill -RTMIN+1 i3blocks
+bindsym XF86AudioLowerVolume exec amixer -D default sset Master 5%- && pkill -RTMIN+1 i3blocks
 
 # Pulse Audio controls
 
@@ -436,7 +436,9 @@ exec --no-startup-id dbus-launch dunst --config ~/.config/dunst/dunstrc
 
 # networkmanager-applet
 exec --no-startup-id nm-applet
-exec --no-startup-ip octoxbps-notifier
+exec --no-startup-id octoxbps-notifier
+exec --no-startup-id volumeicon
+
 # clipman-applet
 #exec --no-startup-id xfce4-clipman
 
