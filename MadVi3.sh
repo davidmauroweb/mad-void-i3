@@ -166,6 +166,7 @@ cp nanorc ~/.nanorc
 cp Scripts ~/ -R
 cp config/i3 ~/.config -R
 cp config/rofi ~/.config -R
+cp config/clearine ~/.config -R
 sudo ln -s /etc/sv/dbus /var/service/
 sudo ln -s /etc/sv/NetworkManager /var/service/
 sudo ln -s /etc/sv/elogind /var/service/
