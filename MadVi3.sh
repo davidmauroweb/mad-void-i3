@@ -29,7 +29,7 @@ fi
 #base grafica
 sudo xbps-install -Sy at-spi2-core base-devel p7zip xdg-user-dirs NetworkManager network-manager-applet xorg xinit gvfs elogind lxdm nano htop neofetch pluma xarchiver octoxbps xtools
 echo "intalacion de i3"
-sudo xbps-install -Sy i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf
+sudo xbps-install -Sy i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf clearine alsa-utils
 echo "Software extra"
 sudo xbps-install -Sy xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot
 
