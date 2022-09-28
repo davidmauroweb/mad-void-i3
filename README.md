@@ -56,6 +56,8 @@ Continuado unos esta la información de algunos datos del sistema como uso de la
 
 Estos scripts se encuentran en ~/.config/i3/scripts.
 
+Por último la hora y el tray con el gestor de redes, Octoxbps para gestionar software, y el control de volumen
+
 Por consultas o sugerencias enviar mail a davidmauroweb@gmail.com.
 
 Gracias!
