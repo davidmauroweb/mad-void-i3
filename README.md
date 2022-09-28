@@ -31,6 +31,8 @@ Win + Alt + q = Administrador de secion, bloquear equipo, cerrar secion, reinici
 
 Win + [1..0] = Cambio de espacios de trabajo
 
+Win + Alt + [1..0] = Mover ventana activa al espacio de trabajo...
+
 Win + s = Ventana flotante (presionando nuevamente vuelve a modo tilin)
 
 Win + arrastrar con mouse = Mover ventanas flotantes
