@@ -27,9 +27,9 @@ fi
 
 
 #base grafica
-sudo xbps-install -Sy at-spi2-core base-devel p7zip xdg-user-dirs NetworkManager network-manager-applet xorg xinit gvfs elogind lxdm nano htop neofetch pluma xarchiver octoxbps xtools
+sudo xbps-install -Sy at-spi2-core base-devel p7zip xdg-user-dirs NetworkManager network-manager-applet xorg xinit gvfs elogind lxdm nano htop neofetch pluma xarchiver octoxbps xtools cpupower lm_sensors
 echo "intalacion de i3"
-sudo xbps-install -Sy i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf clearine alsa-utils pamixer volumeicon
+sudo xbps-install -Sy i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf clearine alsa-utils pamixer volumeicon pavucontrol upower
 echo "Software extra"
 sudo xbps-install -Sy xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot
 
