@@ -1,4 +1,7 @@
 exec --no-startup-id ~/set_once_i3.sh
+#### ESTA ARCHIVO ES UNA EDICIÓN DE LA CONFIGURACIÓN DE I3 DE ENDEAVOUR
+#### NO SE QUITAN SUS REFERENCIAS
+# ------------------------------------------------------------------------
 # This file is a modified version based on default i3-config-wizard config
 # source is available here:
 # https://raw.githubusercontent.com/endeavouros-team/endeavouros-i3wm-setup/master/.config/i3/config
@@ -14,7 +17,7 @@ exec --no-startup-id ~/set_once_i3.sh
 # Source for complete framework of our i3 config and theming here: https://github.com/endeavouros-team/endeavouros-i3wm-setup
 # EndeavourOS wiki holds some Information also: https://discovery.endeavouros.com/window-tiling-managers/i3-wm/
 # Please see http://i3wm.org/docs/userguide.html for the official i3 reference!
-
+# --------------------------------------------------------------------------
 #######################
 # config starts here: #
 #######################
