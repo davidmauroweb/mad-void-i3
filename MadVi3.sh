@@ -163,6 +163,7 @@ cp bg* ~/Fondosvs/
 sudo mkdir /usr/share/backgrounds
 sudo cp bg* /usr/share/backgrounds/
 cp nanorc ~/.nanorc
+cp Xresources ~/.Xresources
 cp Scripts ~/ -R
 cp config/i3 ~/.config -R
 cp config/rofi ~/.config -R
