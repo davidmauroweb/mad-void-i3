@@ -31,7 +31,7 @@ sudo xbps-install -Sy at-spi2-core base-devel p7zip xdg-user-dirs NetworkManager
 echo "intalacion de i3"
 sudo xbps-install -Sy i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf clearine alsa-utils pamixer volumeicon pavucontrol upower
 echo "Software extra"
-sudo xbps-install -Sy xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot
+sudo xbps-install -Sy xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot gtk-theme-untied-gnome
 
 #Ofimatica
 clear
@@ -167,6 +167,7 @@ cp Scripts ~/ -R
 cp config/i3 ~/.config -R
 cp config/rofi ~/.config -R
 cp config/clearine ~/.config -R
+cp config/gtk-3.0 ~/.config -R
 sudo ln -s /etc/sv/dbus /var/service/
 sudo ln -s /etc/sv/NetworkManager /var/service/
 sudo ln -s /etc/sv/elogind /var/service/
