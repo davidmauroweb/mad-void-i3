@@ -321,7 +321,7 @@ set $ws10 "10:10"
 #workspace $ws5 output HDMI-0
 
 # bind program to workspace and focus to them on startup:
-assign [class="Xfce4-terminal"] $ws1
+assign [class="XTerm"] $ws1
 assign [class="Firefox"] $ws2
 assign [class="Pcmanfm"] $ws3
 assign [class="Thunderbird"] $ws4
@@ -339,6 +339,7 @@ for_window [class="DesktopEditor"] move to workspace $ws9
 for_window [class="Whatsapp-for-linux"] move to workspace $ws5
 for_window [class="Spotify"] move to workspace $ws10
 for_window [class="XTerm"] floating enable
+for_window [class="Oblogout"] fullscreen enable
 ##############
 # compositor #
 ##############
