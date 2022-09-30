@@ -54,7 +54,7 @@ Firefox
 
 PcmanFM
 
-Pospone 30 minutos el protector de pantalla (se puede cambiar el tiempo en ~/.config/i3/i3blocks.conf en el sector [time]
+Pospone 30 minutos el protector de pantalla (se puede cambiar el tiempo en ~/.config/i3/i3blocks.conf en el sector [time])
 
 Continuado unos esta la información de algunos datos del sistema como uso de la partición /, uso de memoria, temperatura, uso de la red, y estado de la batería.
 
