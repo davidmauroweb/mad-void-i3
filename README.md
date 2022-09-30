@@ -1,4 +1,4 @@
-# mad-void-i3
+## mad-void-i3
 Proyecto para automatizar la instalacion de i3 en void linux, estilo inspirado en la version de i3 de EndeavourOS
 
 Comprobar que el usuario con el que se ejecuta este script pertenece al grupo wheel y este esta correctamente configurado en /etc/sudoers.
@@ -17,7 +17,7 @@ root ALL=(ALL:ALL) ALL
 
 "
 
-ATAJOS DE TECLADO
+## ATAJOS DE TECLADO
 
 Win + Espacio = Rofi (lanzador de aplicaciones)
 
@@ -43,6 +43,8 @@ Win + f = Ventana en pantalla completa
 Ademas debería funcionar los accesos s las teclas especiales de volumen y reproducción de audio.
 
 Demas configuraciones de acceso de teclado en ~/.config/i3/config
+
+## Barra Superior
 
 En la barra superior se encuentran 4 iconos:
 
