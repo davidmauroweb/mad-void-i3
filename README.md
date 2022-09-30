@@ -17,7 +17,7 @@ root ALL=(ALL:ALL) ALL
 
 "
 
-## ATAJOS DE TECLADO
+## Atajos de Teclado
 
 Win + Espacio = Rofi (lanzador de aplicaciones)
 
