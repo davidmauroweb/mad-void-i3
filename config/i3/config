@@ -173,7 +173,7 @@ bindcode $mod+Shift+90 	 move container to workspace  $ws10
 
 # start a terminal
 # bindsym $mod+$alt+Return exec mate-terminal # descomentar si se instala un terminal para tiling
-bindsym $mod+Return exec xterm -bg black -fn 9x15 -foreground green # xterm se ejecuta flotante
+bindsym $mod+Return exec st # xterm -bg black -fn 9x15 -foreground green # xterm se ejecuta flotante
 
 # kill focused window
 bindsym $mod+q kill
@@ -321,7 +321,7 @@ set $ws10 "10:10"
 #workspace $ws5 output HDMI-0
 
 # bind program to workspace and focus to them on startup:
-assign [class="XTerm"] $ws1
+assign [class="st"] $ws1
 assign [class="Firefox"] $ws2
 assign [class="Pcmanfm"] $ws3
 assign [class="Thunderbird"] $ws4
@@ -330,7 +330,7 @@ assign [class="Whatsapp-for-linux"] $ws5
 assign [class="Spotify"] $ws10
 
 # automatic set focus new window if it opens on another workspace then the current:
-for_window [class=Xfce4-terminal] focus
+for_window [class=st] focus
 for_window [class=Firefox] focus
 for_window [class=Pcmanfm] focus
 for_window [class=Thunderbird] focus
@@ -338,7 +338,7 @@ for_window [class=TelegramDesktop] focus
 for_window [class="DesktopEditor"] move to workspace $ws9
 for_window [class="Whatsapp-for-linux"] move to workspace $ws5
 for_window [class="Spotify"] move to workspace $ws10
-for_window [class="XTerm"] floating enable
+for_window [class="st"] floating enable
 for_window [class="Oblogout"] fullscreen enable
 ##############
 # compositor #
@@ -450,7 +450,7 @@ exec --no-startup-id volumeicon
 for_window [class="Yad" instance="yad"] floating enable
 for_window [class="Galculator" instance="galculator"] floating enable
 for_window [class="Blueberry.py" instance="blueberry.py"] floating enable
-for_window [class="xterm"] floating enable
+for_window [class="st"] floating enable
 
 
 # set floating (nontiling) for special apps
