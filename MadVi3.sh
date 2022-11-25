@@ -31,7 +31,7 @@ sudo xbps-install -Sy at-spi2-core base-devel p7zip xdg-user-dirs NetworkManager
 echo "intalacion de i3"
 sudo xbps-install -Sy i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf clearine alsa-utils pamixer volumeicon pavucontrol upower
 echo "Software extra"
-sudo xbps-install -Sy xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot gtk-theme-united-gnome st
+sudo xbps-install -Sy xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot gtk-theme-united-gnome st sysstat
 
 #Ofimatica
 clear
