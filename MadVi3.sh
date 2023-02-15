@@ -29,7 +29,7 @@ fi
 #base grafica
 sudo xbps-install -Sy at-spi2-core base-devel p7zip xdg-user-dirs NetworkManager network-manager-applet xorg xinit gvfs elogind lxdm nano htop neofetch pluma xarchiver octoxbps xtools cpupower lm_sensors
 echo "intalacion de i3"
-sudo xbps-install -Sy i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf clearine alsa-utils pamixer volumeicon pavucontrol upower
+sudo xbps-install -Sy i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf clearine alsa-utils pamixer volumeicon pavucontrol upower picom
 echo "Software extra"
 sudo xbps-install -Sy xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot gtk-theme-united-gnome st sysstat
 
@@ -163,6 +163,7 @@ cp bg* ~/Fondosvs/
 sudo mkdir /usr/share/backgrounds
 sudo cp bg* /usr/share/backgrounds/
 cp nanorc ~/.nanorc
+cp /usr/share/examples/picom/picom.sample.conf ~/.config/picom.conf
 cp Xresources ~/.Xresources
 cp Scripts ~/ -R
 cp config/i3 ~/.config -R
