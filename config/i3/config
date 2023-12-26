@@ -58,8 +58,8 @@ new_window pixel 1
 # hide_edge_borders both
 
 # Set inner/outer gaps
-gaps inner 6
-gaps outer 3
+gaps inner 3
+gaps outer 2
 
 # show window title bars (not officially supported with i3gaps)
 #default_border normal
@@ -324,16 +324,18 @@ set $ws10 "10:10"
 assign [class="Alacritty"] $ws1
 assign [class="Firefox"] $ws2
 assign [class="Pcmanfm"] $ws3
-assign [class="Thunderbird"] $ws4
+assign [class="Code"] $ws6
 assign [class="TelegramDesktop"] $ws5
 assign [class="Whatsapp-for-linux"] $ws5
+assign [class="octoxbps"] $ws9
 assign [class="Spotify"] $ws10
 
 # automatic set focus new window if it opens on another workspace then the current:
 for_window [class=Alacritty] focus
 for_window [class=Firefox] focus
 for_window [class=Pcmanfm] focus
-for_window [class=Thunderbird] focus
+for_window [class=Code] focus
+for_window [class=octoxbps] focus
 for_window [class=TelegramDesktop] focus
 for_window [class="DesktopEditor"] move to workspace $ws9
 for_window [class="Whatsapp-for-linux"] move to workspace $ws5
