@@ -16,8 +16,8 @@ case $((
  $PERCENT > 75 && $PERCENT <= 100 ? 4 : 5)) in
 #
 
-       (0) echo $ST" !" $PERCENT% &&  dunstify --action="replyAction,reply" "Batería Baja";;
-       (1) echo $ST" " $PERCENT%;;
+       (0) echo $ST" !" $PERCENT% && notifi-send -u critical "Conectar Cargador";;
+       (1) echo $ST" " $PERCENT% && notifu-send -u low "Batería Baja";;
        (2) echo $ST" " $PERCENT%;;
        (3) echo $ST" " $PERCENT%;;
        (4) echo $ST" " $PERCENT%;;
