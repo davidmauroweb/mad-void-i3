@@ -5,20 +5,20 @@
 PERCENT=$(cat /sys/class/power_supply/BAT1/capacity)
 STATUS=$(cat /sys/class/power_supply/BAT1/status)
 ST=""
-r='\033[0;31m'
-n='\033[0m'
 if [ "$STATUS" = "Discharging" ]; then ST="";fi
 case $((
- $PERCENT >= 0 && $PERCENT <= 5 ? 0 :
- $PERCENT > 5 && $PERCENT <= 25 ? 1 :
- $PERCENT > 25 && $PERCENT <= 50 ? 2 :
- $PERCENT > 50 && $PERCENT <= 75 ? 3 :
- $PERCENT > 75 && $PERCENT <= 100 ? 4 : 5)) in
+ $PERCENT >= 0 && $PERCENT <= 5 ? 1 :
+ $PERCENT > 5 && $PERCENT <= 10 ? 2 :
+ $PERCENT > 10 && $PERCENT <= 25 ? 3 :
+ $PERCENT > 25 && $PERCENT <= 50 ? 4 :
+ $PERCENT > 50 && $PERCENT <= 75 ? 5 :
+ $PERCENT > 75 && $PERCENT <= 100 ? 6 : 7 )) in
 #
 
-       (0) echo $ST" !" $PERCENT% && notifi-send -u critical "Conectar Cargador";;
-       (1) echo $ST" " $PERCENT% && notifu-send -u low "Batería Baja";;
-       (2) echo $ST" " $PERCENT%;;
-       (3) echo $ST" " $PERCENT%;;
-       (4) echo $ST" " $PERCENT%;;
+       (1) echo $ST" !" $PERCENT% && notify-send -u critical "Conectar Cargador";;
+       (2) echo $ST" " $PERCENT% && notify-send -u low "Batería Baja";;
+       (3) echo $ST" " $PERCENT%;;
+       (4) echo $ST" " $PERCENT%;;
+       (5) echo $ST" " $PERCENT%;;
+       (6) echo $ST" " $PERCENT%;;
 esac
