@@ -26,8 +26,13 @@ else
 fi
 
 
-#base grafica
-sudo xbps-install -Sy at-spi2-core base-devel p7zip xdg-user-dirs NetworkManager network-manager-applet xorg xinit gvfs elogind lxdm nano htop neofetch pluma xarchiver octoxbps xtools cpupower lm_sensors zramen
+#base grafica 
+echo "Agregando Repositorios NonFree"
+sudo xbps-install -Sy void-repo-multilib void-repo-multilib-nonfree void-repo-nonfree
+echo "intalacion de base"
+sudo xbps-install -Sy at-spi2-core base-devel xdg-user-dirs NetworkManager gvfs p7zip nano htop neofetch cpupower lm_sensors zramen
+echo "instalacion de accesorios graficos"
+sudo xbps-install -Sy network-manager-applet xorg xinit elogind lxdm  pluma xarchiver octoxbps xtools
 echo "intalacion de i3"
 sudo xbps-install -Sy i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf clearine alsa-utils pamixer volumeicon pavucontrol upower picom
 echo "Software extra"
