@@ -1,11 +1,4 @@
-import -window root /tmp/screenshot.png 
-import -window root /tmp/screenshot.png 
-import -window root /tmp/screenshot.png 
-import -window root /tmp/screenshot.png 
-import -window root /tmp/screenshot.png 
-import -window root /tmp/screenshot.png 
-import -window root /tmp/screenshot.png 
-import -window root /tmp/screenshot111.png 
+import -window root /tmp/screenshot-i3.png 
 
 feh /tmp/*.png
 
