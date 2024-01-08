@@ -34,7 +34,7 @@ sudo xbps-install -Sy at-spi2-core base-devel xdg-user-dirs NetworkManager gvfs 
 echo "instalacion de accesorios graficos"
 sudo xbps-install -Sy network-manager-applet xorg xinit elogind lxdm  pluma xarchiver octoxbps xtools
 echo "intalacion de i3"
-sudo xbps-install -Sy i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf clearine alsa-utils pamixer volumeicon pavucontrol upower picom
+sudo xbps-install -Sy i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf clearine alsa-utils pulseaudio alsa-plugins-pulseaudio pamixer volumeicon pavucontrol upower picom
 echo "Software extra"
 sudo xbps-install -Sy xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot gtk-theme-united-gnome st sysstat alacritty
 
