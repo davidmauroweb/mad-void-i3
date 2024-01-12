@@ -28,15 +28,32 @@ fi
 
 #base grafica 
 echo "Agregando Repositorios NonFree"
-sudo xbps-install -Sy void-repo-multilib void-repo-multilib-nonfree void-repo-nonfree
+for pkg in void-repo-multilib void-repo-multilib-nonfree void-repo-nonfree
+do
+	sudo xbps-install -Sy $pkg
+done
+
 echo "intalacion de base"
-sudo xbps-install -Sy at-spi2-core base-devel xdg-user-dirs NetworkManager gvfs p7zip nano htop neofetch cpupower lm_sensors zramen
+for pkg in at-spi2-core base-devel xdg-user-dirs NetworkManager gvfs p7zip nano htop neofetch cpupower lm_sensors zramen
+do
+	sudo xbps-install -Sy $pkg
+done
+
 echo "instalacion de accesorios graficos"
-sudo xbps-install -Sy network-manager-applet xorg xinit elogind lxdm  pluma xarchiver octoxbps xtools
+for pkg in network-manager-applet xorg xinit elogind lxdm  pluma xarchiver octoxbps xtools
+do
+	sudo xbps-install -Sy $pkg
+done
 echo "intalacion de i3"
-sudo xbps-install -Sy i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf clearine alsa-utils pulseaudio alsa-plugins-pulseaudio pamixer volumeicon pavucontrol upower picom
+for pkg in i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf clearine alsa-utils pulseaudio alsa-plugins-pulseaudio pamixer volumeicon pavucontrol upower picom
+do
+	sudo xbps-install -Sy $pkg
+done
 echo "Software extra"
-sudo xbps-install -Sy xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot gtk-theme-united-gnome st sysstat alacritty
+for pkg in xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot gtk-theme-united-gnome st sysstat alacritty
+do
+	sudo xbps-install -Sy $pkg
+done
 
 #Ofimatica
 clear
