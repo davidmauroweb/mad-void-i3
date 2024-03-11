@@ -50,7 +50,7 @@ do
 	sudo xbps-install -Sy $pkg
 done
 echo "Software extra"
-for pkg in xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot gtk-theme-united-gnome st sysstat alacritty
+for pkg in xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot gtk-theme-united-gnome st sysstat alacritty ntpd
 do
 	sudo xbps-install -Sy $pkg
 done
