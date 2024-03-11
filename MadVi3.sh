@@ -44,28 +44,11 @@ for pkg in network-manager-applet xorg xinit elogind lxdm  pluma xarchiver octox
 do
 	sudo xbps-install -Sy $pkg
 done
-echo "intalacion del Window Mnager"
-echo "----------------------------"
-echo "1. Sway"
-echo "2. i3"
-echo "(default = i3)"
-read wm
-case $wm in
-	1)
-		sudo xbps-install -Sy sway
-		;;
-	*)
-		sudo xbps-install -Sy i3-gaps i3blocks i3lock i3status
-		;;
-esac
-
-for pkg in  rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf clearine alsa-utils pulseaudio alsa-plugins-pulseaudio pamixer volumeicon pavucontrol upower picom
+echo "intalacion de i3"
+for pkg in i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf clearine alsa-utils pulseaudio alsa-plugins-pulseaudio pamixer volumeicon pavucontrol upower picom
 do
 	sudo xbps-install -Sy $pkg
 done
-
-
-
 echo "Software extra"
 for pkg in xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot gtk-theme-united-gnome st sysstat alacritty ntpd
 do
@@ -207,10 +190,6 @@ cp /usr/share/examples/picom/picom.sample.conf ~/.config/picom.conf
 cp Xresources ~/.Xresources
 cp Scripts ~/ -R
 cp config/i3 ~/.config -R
-if [[ $wm == 1 ]]
-then
-    mv ~/.config/i3 ~/.config/sway -R
-fi
 cp config/rofi ~/.config -R
 cp config/clearine ~/.config -R
 cp config/gtk-3.0 ~/.config -R
