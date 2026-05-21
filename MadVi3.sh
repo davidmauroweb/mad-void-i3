@@ -1,4 +1,28 @@
 ### Por Adolfo David Mauro mail: davidmauroweb@gmail.com
+optimizacion() {
+    echo "--- Configurando optimizaciones para 8GB de RAM y CPU ---"
+    
+    # Optimizar sysctl para evitar congelamientos por Docker escribiendo en disco
+    sudo mkdir -p /etc/sysctl.d
+    sudo tee /etc/sysctl.d/99-docker-ram.conf <<EOF
+vm.dirty_background_ratio = 5
+vm.dirty_ratio = 10
+vm.max_map_count = 262144
+EOF
+
+    # Configurar ZRAMEN (Compresión de RAM usando algoritmo ZSTD)
+    sudo mkdir -p /etc/zramen
+    sudo tee /etc/zramen/zramen.conf <<EOF
+# Usar ZSTD para el mejor ratio de compresión en desarrollo
+ALGORITHM=zstd
+# Asignar el 100% de la RAM física como espacio ZRAM comprimido
+SIZE_FACTOR=1
+EOF
+}
+
+
+
+
 echo "Configurando Swap de 8GB..."
 sudo dd if=/dev/zero of=/swapfile bs=1M count=8192
 sudo chmod 600 /swapfile
@@ -41,18 +65,18 @@ do
 done
 
 echo "intalacion de base"
-for pkg in at-spi2-core base-devel xdg-user-dirs NetworkManager gvfs p7zip nano htop neofetch cpupower lm_sensors zramen
+for pkg in at-spi2-core base-devel xdg-user-dirs NetworkManager gvfs p7zip nano htop neofetch cpupower lm_sensors zramen tlp auto-cpufreq
 do
 	sudo xbps-install -Sy $pkg
 done
 
 echo "instalacion de accesorios graficos"
-for pkg in network-manager-applet xorg xinit elogind lxdm  pluma xarchiver octoxbps xtools
+for pkg in network-manager-applet xorg xinit elogind lxdm  pluma xarchiver octoxbps xtools xf86-video-intel
 do
 	sudo xbps-install -Sy $pkg
 done
 echo "intalacion de i3"
-for pkg in i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf clearine alsa-utils pulseaudio alsa-plugins-pulseaudio pamixer volumeicon pavucontrol upower picom
+for pkg in i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf clearine alsa-utils pulseaudio pulseaudio-utils alsa-plugins-pulseaudio pamixer volumeicon bluez pavucontrol upower picom
 do
 	sudo xbps-install -Sy $pkg
 done
@@ -61,6 +85,8 @@ for pkg in xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot gtk-the
 do
 	sudo xbps-install -Sy $pkg
 done
+
+optimizacion
 
 #Ofimatica
 clear
@@ -194,9 +220,8 @@ case $d in
 	
 	echo "Habilitando servicios en Runit..."
 	# Habilitar dbus primero (Docker lo requiere para ciertas operaciones de aislamiento)
-	sudo ln -sf /etc/sv/dbus /var/service/
-	# Habilitar el demonio de Docker
-	sudo ln -sf /etc/sv/docker /var/service/
+	sudo ln -sf /etc/sv/containerd /var/service/
+    sudo ln -sf /etc/sv/docker /var/service/
 	
 	echo "Configurando permisos de usuario..."
 	# Sintaxis nativa correcta para Void Linux:
@@ -228,11 +253,15 @@ cp config/i3 ~/.config -R
 cp config/rofi ~/.config -R
 cp config/clearine ~/.config -R
 cp config/gtk-3.0 ~/.config -R
-sudo ln -s /etc/sv/dbus /var/service/
-sudo ln -s /etc/sv/NetworkManager /var/service/
-sudo ln -s /etc/sv/elogind /var/service/
-sudo ln -s /etc/sv/lxdm /var/service/
-sudo ln -s /etc/sv/zramen /var/service/
+sudo ln -sf /etc/sv/dbus /var/service/
+sudo ln -sf /etc/sv/bluetoothd /var/service/
+sudo ln -sf /etc/sv/NetworkManager /var/service/
+sudo ln -sf /etc/sv/elogind /var/service/
+sudo ln -sf /etc/sv/lxdm /var/service/
+sudo ln -sf /etc/sv/zramen /var/service/
+
+sudo ln -sf /etc/sv/tlp /var/service/
+sudo ln -sf /etc/sv/auto-cpufreq /var/service/
 
 ###
 
