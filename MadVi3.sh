@@ -188,15 +188,22 @@ echo "Instalamos Docker? (infresar 1 pasa Instalar)"
 read d
 case $d in
 	1)
-	# Instalar componentes de Docker
-	sudo xbps-install -y docker docker-compose
+	echo "Instalando Docker y Docker Compose..."
+	# shadow asegura tener el comando usermod disponible
+	sudo xbps-install -y docker docker-compose shadow
 	
-	# Habilitar servicios esenciales en runit
+	echo "Habilitando servicios en Runit..."
+	# Habilitar dbus primero (Docker lo requiere para ciertas operaciones de aislamiento)
+	sudo ln -sf /etc/sv/dbus /var/service/
+	# Habilitar el demonio de Docker
 	sudo ln -sf /etc/sv/docker /var/service/
-	sudo ln -sf /etc/sv/dbus /var/service/  # Requerido por muchos componentes gráficos
 	
-	# Permisos de usuario
-	sudo ugroups -a $USER docker
+	echo "Configurando permisos de usuario..."
+	# Sintaxis nativa correcta para Void Linux:
+	sudo usermod -aG docker $USER
+	
+	echo "¡Docker instalado correctamente!"
+	echo "NOTA: Recordá reiniciar la PC para poder usar Docker sin 'sudo'."
 	echo "Listo!, Docker instalado"
 	;;
 	*)
