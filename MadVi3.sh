@@ -183,6 +183,27 @@ case $m in
         ;;
 esac
 
+clear
+echo "Instalamos Docker? (infresar 1 pasa Instalar)"
+read d
+case $d in
+	1)
+	# Instalar componentes de Docker
+	sudo xbps-install -y docker docker-compose
+	
+	# Habilitar servicios esenciales en runit
+	sudo ln -sf /etc/sv/docker /var/service/
+	sudo ln -sf /etc/sv/dbus /var/service/  # Requerido por muchos componentes gráficos
+	
+	# Permisos de usuario
+	sudo ugroups -a $USER docker
+	echo "Listo!, Docker instalado"
+	;;
+	*)
+	echo "Se ha omitido la instalación de Docker"
+	;;
+esac
+
 #iniciar servicios
 echo "Activando Servicios"
 cd $rt
