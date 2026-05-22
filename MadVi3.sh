@@ -1,5 +1,7 @@
 ### Por Adolfo David Mauro mail: davidmauroweb@gmail.com
-optimizacion() {
+ram=$(free -g | awk '/^Mem:/{print $2}')
+
+opt8() {
     echo "--- Configurando optimizaciones para 8GB de RAM y CPU ---"
     
     # Optimizar sysctl para evitar congelamientos por Docker escribiendo en disco
@@ -18,10 +20,6 @@ ALGORITHM=zstd
 # Asignar el 100% de la RAM física como espacio ZRAM comprimido
 SIZE_FACTOR=1
 EOF
-}
-
-
-
 
 echo "Configurando Swap de 8GB..."
 sudo dd if=/dev/zero of=/swapfile bs=1M count=8192
@@ -29,6 +27,45 @@ sudo chmod 600 /swapfile
 sudo mkswap /swapfile
 sudo swapon /swapfile
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+}
+
+opt2(){
+echo "--- Configurando optimizaciones agresivas para CPU ATOM y 2GB de RAM ---"
+
+# 1. Configurar Sysctl para usar ZRAM de forma inmediata y prioritaria
+sudo mkdir -p /etc/sysctl.d
+sudo tee /etc/sysctl.d/99-low-ram-atom.conf <<EOF
+vm.swappiness = 100
+vm.dirty_background_ratio = 3
+vm.dirty_ratio = 6
+vm.vfs_cache_pressure = 50
+EOF
+
+# 2. Configurar ZRAMEN con algoritmo ultra-rápido (LZ4) y factor x1.5 (3GB virtuales)
+sudo mkdir -p /etc/zramen
+sudo tee /etc/zramen/zramen.conf <<EOF
+# LZ4 es vital para no saturar al procesador Atom
+ALGORITHM=lz4
+# Crea 3GB de swap en RAM (1.5 * 2GB físicos)
+SIZE_FACTOR=1.5
+EOF
+
+echo "Configurando Swap de 4GB..."
+sudo dd if=/dev/zero of=/swapfile bs=1M count=4096
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+}
+
+if [ "$ram" -gt 4 ]; then
+opt8
+else
+opt2
+fi
+
+
 
 rt=$(pwd)
 
