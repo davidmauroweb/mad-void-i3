@@ -157,7 +157,7 @@ echo "4. Dillo (navegador gráfico minimalista)"
 read w
 case $w in
 	1)
-	w=" firefox"
+	w=" firefox-esr firefox-esr-i18n-es-AR"
 	;;
 	2)
 	w=" chromium"
