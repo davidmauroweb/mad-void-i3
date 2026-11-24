@@ -1,73 +1,229 @@
-### Por Adolfo David Mauro mail: davidmauroweb@gmail.com
-ram=$(free -g | awk '/^Mem:/{print $2}')
+#!/bin/bash
+# Post-instalación de Void Linux con i3 + LXDM.
+# Perfil de portátil Intel (EliteBook 840 G6: Whiskey Lake, UHD 620, 16 GB):
+# zram de hasta 4 GiB, swap de disco chico, TLP, modesetting y VA-API.
 
-opt8() {
-    echo "--- Configurando optimizaciones para 8GB de RAM y CPU ---"
-    
-    # Optimizar sysctl para evitar congelamientos por Docker escribiendo en disco
-    sudo mkdir -p /etc/sysctl.d
-    sudo tee /etc/sysctl.d/99-docker-ram.conf <<EOF
+configure_memory() {
+	local ram_gb zram_percent zram_max swap_gb root_fs
+	while true; do
+		read -r -p "RAM instalada en GB (2, 4, 8 o más): " ram_gb
+		case "$ram_gb" in
+			2) zram_percent=50; zram_max=1024; swap_gb=2; break ;;
+			4) zram_percent=50; zram_max=2048; swap_gb=4; break ;;
+			8) zram_percent=25; zram_max=2048; swap_gb=8; break ;;
+			*[!0-9]*|'') echo "Ingrese 2, 4, 8 o una cantidad entera mayor." ;;
+			*)
+				if [ "$ram_gb" -gt 8 ]; then
+					# 16 GB o más: zram de 4 GiB y swap de disco solo como red.
+					zram_percent=25
+					zram_max=4096
+					swap_gb=4
+					break
+				fi
+				echo "Ingrese 2, 4, 8 o una cantidad entera mayor."
+				;;
+		esac
+	done
+
+	echo "ZRAM: ${zram_percent}% de la RAM, con tope de ${zram_max} MiB."
+	sudo install -d /etc/sv/zramen
+	sudo tee /etc/sv/zramen/conf >/dev/null <<EOF
+export ZRAM_COMP_ALGORITHM='lz4'
+export ZRAM_PRIORITY=100
+export ZRAM_SIZE=$zram_percent
+export ZRAM_MAX_SIZE=$zram_max
+EOF
+
+	sudo tee /etc/sysctl.d/99-zram.conf >/dev/null <<'EOF'
+vm.swappiness = 180
+vm.page-cluster = 0
 vm.dirty_background_ratio = 5
 vm.dirty_ratio = 10
-vm.max_map_count = 262144
 EOF
+	sudo sysctl --system >/dev/null
 
-    # Configurar ZRAMEN (Compresión de RAM usando algoritmo ZSTD)
-    sudo mkdir -p /etc/zramen
-    sudo tee /etc/zramen/zramen.conf <<EOF
-# Usar ZSTD para el mejor ratio de compresión en desarrollo
-ALGORITHM=zstd
-# Asignar el 100% de la RAM física como espacio ZRAM comprimido
-SIZE_FACTOR=1
-EOF
+	if [ ! -e /swapfile ]; then
+		root_fs=$(findmnt -n -o FSTYPE /)
+		if [ "$root_fs" = btrfs ]; then
+			echo "No se creó /swapfile automáticamente en Btrfs. Configure una swapfile Btrfs válida antes de hibernar."
+		else
+			echo "Creando /swapfile de ${swap_gb} GiB..."
+			if sudo dd if=/dev/zero of=/swapfile bs=1M count=$((swap_gb * 1024)) status=progress &&
+				sudo chmod 600 /swapfile &&
+				sudo mkswap /swapfile &&
+				sudo swapon /swapfile; then
+				if ! grep -qE '^[[:space:]]*/swapfile[[:space:]]' /etc/fstab; then
+					echo '/swapfile none swap defaults,pri=10 0 0' | sudo tee -a /etc/fstab >/dev/null
+				fi
+			else
+				sudo swapoff /swapfile 2>/dev/null || true
+				sudo rm -f /swapfile
+				echo "No se pudo activar /swapfile; revise el filesystem y configure swap manualmente."
+			fi
+		fi
+	else
+		echo "Ya existe /swapfile; no se sobrescribió."
+	fi
 
-echo "Configurando Swap de 8GB..."
-sudo dd if=/dev/zero of=/swapfile bs=1M count=8192
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
-echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-
+	echo "La suspensión a RAM queda a cargo de elogind. La hibernación pide un swap del tamaño de la RAM y resume/resume_offset."
 }
 
-opt2(){
-echo "--- Configurando optimizaciones agresivas para CPU ATOM y 2GB de RAM ---"
+write_hardware_tuning() {
+	echo "Aplicando ajustes de UHD 620, TLP y la tapa..."
 
-# 1. Configurar Sysctl para usar ZRAM de forma inmediata y prioritaria
-sudo mkdir -p /etc/sysctl.d
-sudo tee /etc/sysctl.d/99-low-ram-atom.conf <<EOF
-vm.swappiness = 100
-vm.dirty_background_ratio = 3
-vm.dirty_ratio = 6
-vm.vfs_cache_pressure = 50
+	sudo tee /etc/modprobe.d/i915.conf >/dev/null <<'EOF'
+# UHD 620 (Whiskey Lake). HuC para video, FBC para consumo, PSR apagado por parpadeo del panel.
+options i915 enable_guc=2 enable_fbc=1 enable_psr=0
 EOF
 
-# 2. Configurar ZRAMEN con algoritmo ultra-rápido (LZ4) y factor x1.5 (3GB virtuales)
-sudo mkdir -p /etc/zramen
-sudo tee /etc/zramen/zramen.conf <<EOF
-# LZ4 es vital para no saturar al procesador Atom
-ALGORITHM=lz4
-# Crea 3GB de swap en RAM (1.5 * 2GB físicos)
-SIZE_FACTOR=1.5
+	sudo install -d /etc/dracut.conf.d
+	sudo tee /etc/dracut.conf.d/intel.conf >/dev/null <<'EOF'
+hostonly="yes"
+early_microcode="yes"
+force_drivers+=" i915 "
 EOF
 
-echo "Configurando Swap de 4GB..."
-sudo dd if=/dev/zero of=/swapfile bs=1M count=4096
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
-echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+	sudo install -d /etc/tlp.d
+	sudo tee /etc/tlp.d/01-elitebook.conf >/dev/null <<'EOF'
+# TLP 1.9+: _AC = rendimiento, _BAT = equilibrado (batería), _SAV = ahorro.
+CPU_SCALING_GOVERNOR_ON_AC=performance
+CPU_SCALING_GOVERNOR_ON_BAT=powersave
+CPU_SCALING_GOVERNOR_ON_SAV=powersave
+CPU_ENERGY_PERF_POLICY_ON_AC=balance_performance
+CPU_ENERGY_PERF_POLICY_ON_BAT=power
+CPU_ENERGY_PERF_POLICY_ON_SAV=power
+CPU_BOOST_ON_AC=1
+CPU_BOOST_ON_BAT=0
+CPU_BOOST_ON_SAV=0
+CPU_HWP_DYN_BOOST_ON_AC=1
+CPU_HWP_DYN_BOOST_ON_BAT=0
+CPU_HWP_DYN_BOOST_ON_SAV=0
+PLATFORM_PROFILE_ON_AC=performance
+PLATFORM_PROFILE_ON_BAT=balanced
+PLATFORM_PROFILE_ON_SAV=low-power
+WIFI_PWR_ON_AC=off
+WIFI_PWR_ON_BAT=on
+USB_AUTOSUSPEND=1
+EOF
+
+	if compgen -G '/sys/class/power_supply/BAT*/charge_control_end_threshold' >/dev/null; then
+		sudo tee -a /etc/tlp.d/01-elitebook.conf >/dev/null <<'EOF'
+START_CHARGE_THRESH_BAT0=75
+STOP_CHARGE_THRESH_BAT0=80
+EOF
+		echo "Umbral de carga 75-80 % activo: el kernel expone charge_control en la batería."
+	else
+		echo "Esta máquina no expone umbrales de carga. TLP no limitará el 100 %."
+	fi
+
+	tmp=$(mktemp)
+	cat >"$tmp" <<'EOF'
+%wheel ALL=(ALL) NOPASSWD: /usr/bin/tlp ac, /usr/bin/tlp bat, /usr/bin/tlp start, /usr/bin/tlp performance, /usr/bin/tlp balanced, /usr/bin/tlp power-saver
+EOF
+	if sudo visudo -cf "$tmp" >/dev/null; then
+		sudo install -m 440 "$tmp" /etc/sudoers.d/tlp-modes
+	else
+		echo "No se instaló /etc/sudoers.d/tlp-modes: visudo rechazó la sintaxis."
+	fi
+	rm -f "$tmp"
+
+	sudo install -d /etc/elogind/logind.conf.d
+	sudo tee /etc/elogind/logind.conf.d/lid.conf >/dev/null <<'EOF'
+[Login]
+HandleLidSwitch=suspend
+HandleLidSwitchExternalPower=suspend
+IdleAction=suspend
+IdleActionSec=20min
+EOF
+
+	if ! grep -q '^LIBVA_DRIVER_NAME=' /etc/environment 2>/dev/null; then
+		echo 'LIBVA_DRIVER_NAME=iHD' | sudo tee -a /etc/environment >/dev/null
+	fi
 }
 
-if [ "$ram" -gt 4 ]; then
-opt8
-else
-opt2
-fi
+setup_pipewire() {
+	sudo install -d /etc/pipewire/pipewire.conf.d /etc/alsa/conf.d
+	if [ -f /usr/share/examples/wireplumber/10-wireplumber.conf ]; then
+		sudo ln -sf /usr/share/examples/wireplumber/10-wireplumber.conf /etc/pipewire/pipewire.conf.d/
+	fi
+	if [ -f /usr/share/examples/pipewire/20-pipewire-pulse.conf ]; then
+		sudo ln -sf /usr/share/examples/pipewire/20-pipewire-pulse.conf /etc/pipewire/pipewire.conf.d/
+	fi
+	if [ -f /usr/share/alsa/alsa.conf.d/50-pipewire.conf ]; then
+		sudo ln -sf /usr/share/alsa/alsa.conf.d/50-pipewire.conf /etc/alsa/conf.d/
+	fi
+	if [ -f /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf ]; then
+		sudo ln -sf /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf /etc/alsa/conf.d/
+	fi
+}
 
+setup_fstrim() {
+	sudo install -d /etc/cron.weekly
+	sudo tee /etc/cron.weekly/fstrim >/dev/null <<'EOF'
+#!/bin/sh
+fstrim -A
+EOF
+	sudo chmod 755 /etc/cron.weekly/fstrim
+}
 
+setup_groups() {
+	local g have=""
+	for g in audio video storage network bluetooth input; do
+		if getent group "$g" >/dev/null; then
+			have="${have:+$have,}$g"
+		fi
+	done
+	if [ -n "$have" ]; then
+		sudo usermod -aG "$have" "$USER"
+		echo "Grupos de $USER: $have"
+	fi
+}
+
+enable_service() {
+	local name="$1"
+	if [ -d "/etc/sv/$name" ]; then
+		sudo ln -sf "/etc/sv/$name" /var/service/
+	else
+		echo "No se encontró /etc/sv/$name; el servicio no se activó."
+	fi
+}
+
+reconfigure_kernel() {
+	local kpkg found=0
+	while read -r kpkg; do
+		[ -n "$kpkg" ] || continue
+		found=1
+		echo "Regenerando initramfs de $kpkg..."
+		sudo xbps-reconfigure -f "$kpkg"
+	done < <(xbps-query -l | sed -n 's/^ii[[:space:]]\+\(linux[0-9][0-9.]*\)-.*/\1/p')
+	if [ "$found" -eq 0 ]; then
+		echo "No se detectó el paquete del kernel. Ejecute xbps-reconfigure -f linuxX.Y para cargar intel-ucode."
+	fi
+}
+
+write_firefox_policy() {
+	sudo install -d /etc/firefox/policies
+	sudo tee /etc/firefox/policies/policies.json >/dev/null <<'EOF'
+{
+  "policies": {
+    "Preferences": {
+      "media.ffmpeg.vaapi.enabled": {
+        "Value": true,
+        "Status": "default"
+      },
+      "gfx.webrender.all": {
+        "Value": true,
+        "Status": "default"
+      }
+    }
+  }
+}
+EOF
+}
 
 rt=$(pwd)
+enable_bt=0
+install_firefox=0
 
 clear
 
@@ -93,37 +249,51 @@ else
 	exit 1
 fi
 
+echo "Actualizando el sistema..."
+if ! sudo xbps-install -Syu -y; then
+	echo "Falló la actualización del sistema."
+	exit 1
+fi
 
-#base grafica 
-echo "Agregando Repositorios NonFree"
-for pkg in void-repo-multilib void-repo-multilib-nonfree void-repo-nonfree
-do
-	sudo xbps-install -Sy $pkg
-done
+echo "Agregando repositorios nonfree y multilib..."
+if ! sudo xbps-install -y void-repo-multilib void-repo-multilib-nonfree void-repo-nonfree; then
+	echo "No se pudieron habilitar los repositorios."
+	exit 1
+fi
+sudo xbps-install -S
 
-echo "intalacion de base"
-for pkg in at-spi2-core base-devel xdg-user-dirs NetworkManager gvfs p7zip nano htop neofetch cpupower lm_sensors zramen tlp auto-cpufreq
-do
-	sudo xbps-install -Sy $pkg
-done
+echo "Instalando paquetes base, escritorio y soporte del EliteBook..."
+base_pkgs=(
+	at-spi2-core xdg-user-dirs NetworkManager gvfs 7zip nano htop fastfetch
+	lm_sensors zramen tlp tlp-rdw thermald snooze
+	intel-ucode sof-firmware linux-firmware-intel linux-firmware-network
+	intel-video-accel libva-utils
+	brightnessctl xf86-input-libinput bolt fwupd nvme-cli smartmontools
+	network-manager-applet xorg xinit elogind lxdm pluma xarchiver octoxbps xtools
+	polkit-gnome
+	i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6
+	noto-fonts-ttf clearine alsa-utils pipewire pipewire-pulse wireplumber
+	alsa-pipewire libspa-bluetooth pamixer bluez pavucontrol upower picom playerctl
+	xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot
+	gtk-theme-united-gnome st sysstat alacritty ntp
+)
 
-echo "instalacion de accesorios graficos"
-for pkg in network-manager-applet xorg xinit elogind lxdm  pluma xarchiver octoxbps xtools xf86-video-intel
-do
-	sudo xbps-install -Sy $pkg
-done
-echo "intalacion de i3"
-for pkg in i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6 noto-fonts-ttf clearine alsa-utils pulseaudio pulseaudio-utils alsa-plugins-pulseaudio pamixer volumeicon bluez pavucontrol upower picom
-do
-	sudo xbps-install -Sy $pkg
-done
-echo "Software extra"
-for pkg in xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot gtk-theme-united-gnome st sysstat alacritty ntpd
-do
-	sudo xbps-install -Sy $pkg
-done
+if ! sudo xbps-install -y "${base_pkgs[@]}"; then
+	echo "Falló la instalación de paquetes. Revise el nombre que rechazó xbps."
+	exit 1
+fi
 
-optimizacion
+if xbps-query xf86-video-intel >/dev/null 2>&1; then
+	echo "Quitando xf86-video-intel: UHD 620 usa el driver modesetting de Xorg."
+	sudo xbps-remove -y xf86-video-intel || true
+fi
+
+configure_memory
+write_hardware_tuning
+setup_pipewire
+setup_fstrim
+setup_groups
+reconfigure_kernel
 
 #Ofimatica
 clear
@@ -133,13 +303,13 @@ echo "1. Abiword + Gnumeric"
 echo "2. Libreoffice"
 echo "3. Sin Paquetes de Oficina"
 read o
-spell= "aspell hunspell-es_ES"
+spell="aspell hunspell-es_ES"
 case $o in
 	1)
-		o="abiword gnumeric "$spell
+		o="abiword gnumeric $spell"
 		;;
 	2)
-		o="libreoffice libreoffice-i18n-es "$spell
+		o="libreoffice libreoffice-i18n-es $spell"
 		;;
 	*)
 		echo "Se ha omitido la instalación de paquetes de Oficina"
@@ -157,21 +327,22 @@ echo "4. Dillo (navegador gráfico minimalista)"
 read w
 case $w in
 	1)
-	w=" firefox-esr firefox-esr-i18n-es-AR"
-	;;
+		w="firefox-esr firefox-esr-i18n-es-AR"
+		install_firefox=1
+		;;
 	2)
-	w=" chromium"
-	;;
+		w="chromium"
+		;;
 	3)
-	w=" midori"
-	;;
+		w="midori"
+		;;
 	4)
-	w=" dillo"
-	;;
+		w="dillo"
+		;;
 	*)
-	echo "Se ha omitido la instalación del navegador"
-	w=""
-	;;
+		echo "Se ha omitido la instalación del navegador"
+		w=""
+		;;
 esac
 
 clear
@@ -181,33 +352,32 @@ echo "1. VLC"
 echo "2. mpv + audacious"
 read m
 case $m in
-        1)
-        m=" vlc "
-        ;;
-        2)
-        m=" mpv audacious"
-        ;;
-        *)
-        echo "Se ha omitido la instalación reproductores multimedia"
-        m=""
-        ;;
+	1)
+		m="vlc"
+		;;
+	2)
+		m="mpv audacious"
+		;;
+	*)
+		echo "Se ha omitido la instalación reproductores multimedia"
+		m=""
+		;;
 esac
 
+if [ -n "${o}${w}${m}" ]; then
+	echo "Instalando los paquetes seleccionados..."
+	sudo xbps-install -y $o $w $m
+fi
 
-# Instalo las selecciones
-echo "instalaciondo los paquetes seleccionados - Ingrese la clave si es requerida"
-sudo xbps-install -Sy $o $w $m
+if [ "$install_firefox" -eq 1 ]; then
+	write_firefox_policy
+fi
 
 clear
 echo "Aplicando configuraciones..."
 sleep 2s
 
-#config
 xdg-user-dirs-update
-
-echo "copiando archivos de configuracion personal"
-
-
 
 clear
 echo "XBPS-Src - para instalar software extra "
@@ -217,15 +387,16 @@ echo "1. Si"
 echo "2. No"
 read m
 case $m in
-        1)
-	cd
-        git clone https://github.com/void-linux/void-packages.git
-	cd void-packages
-	./xbps-src binary-bootstrap
-        ;;
-        *)
-        echo "Se ha omitido la instalación de XBPS-Src"
-        ;;
+	1)
+		sudo xbps-install -y base-devel git
+		cd
+		git clone https://github.com/void-linux/void-packages.git
+		cd void-packages
+		./xbps-src binary-bootstrap
+		;;
+	*)
+		echo "Se ha omitido la instalación de XBPS-Src"
+		;;
 esac
 
 clear
@@ -236,73 +407,89 @@ echo "1. Si"
 echo "2. No"
 read m
 case $m in
-        1)
-	sudo xbps-install -S cups cups-filters gutenprint foomatic-db foomatic-db-nonfree avahi hplip brother-brlaser nss-mdns system-config-printer cups-pk-helper
-	sudo ln -s /etc/sv/cupsd /etc/runit/runsvdir/default/
-	sudo ln -s /etc/sv/avahi-daemon /var/service
-        ;;
-        *)
-        echo "Se ha omitido la instalación de CUPS"
-        ;;
+	1)
+		sudo xbps-install -y cups cups-filters gutenprint foomatic-db foomatic-db-nonfree avahi hplip brother-brlaser nss-mdns system-config-printer cups-pk-helper
+		enable_service cupsd
+		enable_service avahi-daemon
+		;;
+	*)
+		echo "Se ha omitido la instalación de CUPS"
+		;;
 esac
 
 clear
-echo "Instalamos Docker? (infresar 1 pasa Instalar)"
+echo "Bluetooth"
+echo "Activar bluetoothd al arranque e instalar blueman?"
+echo "-----------------------------------------------------------------"
+echo "1. Si"
+echo "2. No"
+read m
+case $m in
+	1)
+		sudo xbps-install -y blueman
+		enable_bt=1
+		;;
+	*)
+		echo "bluetoothd no se activará al arranque."
+		;;
+esac
+
+clear
+echo "Instalamos Docker? (ingresar 1 para instalar)"
 read d
 case $d in
 	1)
-	echo "Instalando Docker y Docker Compose..."
-	# shadow asegura tener el comando usermod disponible
-	sudo xbps-install -y docker docker-compose shadow
-	
-	echo "Habilitando servicios en Runit..."
-	# Habilitar dbus primero (Docker lo requiere para ciertas operaciones de aislamiento)
-	sudo ln -sf /etc/sv/containerd /var/service/
-    sudo ln -sf /etc/sv/docker /var/service/
-	
-	echo "Configurando permisos de usuario..."
-	# Sintaxis nativa correcta para Void Linux:
-	sudo usermod -aG docker $USER
-	
-	echo "¡Docker instalado correctamente!"
-	echo "NOTA: Recordá reiniciar la PC para poder usar Docker sin 'sudo'."
-	echo "Listo!, Docker instalado"
-	;;
+		echo "Instalando Docker y Docker Compose..."
+		sudo xbps-install -y moby docker-cli docker-compose shadow
+		sudo usermod -aG docker "$USER"
+		echo "Docker quedó instalado y el usuario está en el grupo docker."
+		echo "Los servicios no arrancan con el sistema. Para usarlos:"
+		echo "  sudo ln -sf /etc/sv/containerd /var/service/"
+		echo "  sudo ln -sf /etc/sv/docker /var/service/"
+		echo "Reinicie la sesión para usar docker sin sudo."
+		;;
 	*)
-	echo "Se ha omitido la instalación de Docker"
-	;;
+		echo "Se ha omitido la instalación de Docker"
+		;;
 esac
 
-#iniciar servicios
-echo "Activando Servicios"
-cd $rt
+echo "Activando servicios"
+cd "$rt"
 sudo cp lxdm.conf /etc/lxdm/
-mkdir ~/Fondosvs
+mkdir -p ~/Fondosvs ~/.config
 cp bg* ~/Fondosvs/
-sudo mkdir /usr/share/backgrounds
+sudo mkdir -p /usr/share/backgrounds
 sudo cp bg* /usr/share/backgrounds/
-sudo cp config/conf /etc/sv/zramen
 cp nanorc ~/.nanorc
-cp /usr/share/examples/picom/picom.sample.conf ~/.config/picom.conf
+cp "$rt/config/picom.conf" ~/.config/picom.conf
 cp Xresources ~/.Xresources
-cp Scripts ~/ -R
-cp config/i3 ~/.config -R
-cp config/rofi ~/.config -R
-cp config/clearine ~/.config -R
-cp config/gtk-3.0 ~/.config -R
-sudo ln -sf /etc/sv/dbus /var/service/
-sudo ln -sf /etc/sv/bluetoothd /var/service/
-sudo ln -sf /etc/sv/NetworkManager /var/service/
-sudo ln -sf /etc/sv/elogind /var/service/
-sudo ln -sf /etc/sv/lxdm /var/service/
-sudo ln -sf /etc/sv/zramen /var/service/
+cp -R Scripts ~/
+cp -R config/i3 ~/.config/
+cp -R config/rofi ~/.config/
+cp -R config/clearine ~/.config/
+cp -R config/gtk-3.0 ~/.config/
+chmod +x ~/.config/i3/scripts/power-profiles ~/.config/i3/scripts/ppd-status
 
-sudo ln -sf /etc/sv/tlp /var/service/
-sudo ln -sf /etc/sv/auto-cpufreq /var/service/
+enable_service dbus
+enable_service NetworkManager
+enable_service elogind
+enable_service lxdm
+enable_service zramen
+enable_service tlp
+enable_service thermald
+enable_service isc-ntpd
+enable_service snooze-weekly
+enable_service boltd
+if [ "$enable_bt" -eq 1 ]; then
+	enable_service bluetoothd
+fi
 
-###
-
+echo ""
 echo "Instalacion de VoidBsp Completada"
+echo ""
+echo "Reinicie para cargar microcódigo, grupos, TLP e i915."
+echo "Compruebe video con: vainfo"
+echo "Compruebe energía con: sudo tlp-stat -s"
 echo ""
 echo "## Colocar imagenes en la carpeta Fondosvs para la seleccion aleatoria al inicio ##"
 echo ""

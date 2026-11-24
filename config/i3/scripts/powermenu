@@ -103,8 +103,8 @@ function command_exists() {
   command -v "$1" &> /dev/null 2>&1
 }
 
-# systemctl required
-if ! command_exists systemctl ; then
+# loginctl is provided by elogind on Void Linux
+if ! command_exists loginctl ; then
   exit 1
 fi
 
@@ -114,10 +114,10 @@ typeset -A menu
 # Menu with keys/commands
 
 menu=(
-  [ Shutdown]="systemctl poweroff"
-  [ Reboot]="systemctl reboot"
-  [ Suspend]="~/.config/i3/scripts/blur-loc && systemctl suspend"
-  [ Hibernate]="~/.config/i3/scripts/blur-loc && systemctl hibernate"
+  [ Shutdown]="loginctl poweroff"
+  [ Reboot]="loginctl reboot"
+  [ Suspend]="~/.config/i3/scripts/blur-lock && loginctl suspend"
+  [ Hibernate]="~/.config/i3/scripts/blur-lock && loginctl hibernate"
   [ Lock]="~/.config/i3/scripts/blur-lock"
   [ Logout]="i3-msg exit"
   [ Cancel]=""

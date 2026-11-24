@@ -1,7 +1,9 @@
-#!/usr/bin/env bash
-#
+#!/bin/sh
+# Modo actual de TLP (AC o battery) para la barra de i3.
 
-#A script to show current power profile
-
-current_profile=$(/usr/bin/powerprofilesctl get)
-echo "$current_profile"
+stat=$(tlp-stat -s 2>/dev/null || true)
+mode=$(printf '%s\n' "$stat" | sed -n 's/^TLP profile[[:space:]]*=[[:space:]]*//p' | head -n 1)
+if [ -z "$mode" ]; then
+	mode=$(printf '%s\n' "$stat" | sed -n 's/^Mode[[:space:]]*=[[:space:]]*//p' | head -n 1)
+fi
+printf '%s\n' "${mode:-tlp}"

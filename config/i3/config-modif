@@ -181,7 +181,7 @@ bindsym $mod+q kill
 #bindsym $mod+l exec i3lock -i  ~/.config/i3/i3-lock-screen.png -p default|win -t
 # lock by blurring the screen:
 bindsym $mod+l exec ~/.config/i3/scripts/blur-lock
-bindsym $mod+$alt+l exec ~/.config/i3/scripts/blur-lock && systemctl suspend 
+bindsym $mod+$alt+l exec ~/.config/i3/scripts/blur-lock && loginctl suspend
 
 # reload the configuration file
 bindsym $mod+Shift+c reload
@@ -252,8 +252,8 @@ bindsym $mod+Shift+n exec ~/.config/i3/scripts/empty_workspace
 ## Multimedia Keys
 
 # volume
-bindsym XF86AudioRaiseVolume exec amixer -D pulse sset Master 5%+ && pkill -RTMIN+1 i3blocks
-bindsym XF86AudioLowerVolume exec amixer -D pulse sset Master 5%- && pkill -RTMIN+1 i3blocks
+bindsym XF86AudioRaiseVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
+bindsym XF86AudioLowerVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
 
 # Pulse Audio controls
 
@@ -271,7 +271,7 @@ bindsym XF86AudioLowerVolume exec amixer -D pulse sset Master 5%- && pkill -RTMI
 # mute
 #bindsym XF86AudioMute exec amixer sset Master toggle && killall -USR1 i3blocks
 #mute
-bindsym XF86AudioMute exec pamixer -t && notify-send "mute: $(pamixer --get-mute)"
+bindsym XF86AudioMute exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
 
 bindsym XF86AudioPlay exec playerctl play
 bindsym XF86AudioPause exec playerctl pause
