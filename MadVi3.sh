@@ -179,6 +179,23 @@ setup_groups() {
 	fi
 }
 
+setup_fish_shell() {
+	local fish_bin=/usr/bin/fish user uid home
+	if [ ! -x "$fish_bin" ]; then
+		echo "fish no quedó instalado; las cuentas siguen con su shell actual."
+		return
+	fi
+	if ! grep -qx "$fish_bin" /etc/shells; then
+		echo "$fish_bin" | sudo tee -a /etc/shells >/dev/null
+	fi
+	while IFS=: read -r user _ uid _ _ home _; do
+		if [ "$uid" -ge 1000 ] && [ "$uid" -lt 65534 ] && [ -d "$home" ]; then
+			sudo chsh -s "$fish_bin" "$user"
+			echo "Shell de $user: $fish_bin"
+		fi
+	done < /etc/passwd
+}
+
 enable_service() {
 	local name="$1"
 	if [ -d "/etc/sv/$name" ]; then
@@ -275,7 +292,7 @@ base_pkgs=(
 	noto-fonts-ttf clearine alsa-utils pipewire pipewire-pulse wireplumber
 	alsa-pipewire libspa-bluetooth pamixer bluez pavucontrol upower picom playerctl
 	xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot
-	gtk-theme-united-gnome st sysstat alacritty ntp
+	gtk-theme-united-gnome st sysstat alacritty ntp fish
 )
 
 if ! sudo xbps-install -y "${base_pkgs[@]}"; then
@@ -293,6 +310,7 @@ write_hardware_tuning
 setup_pipewire
 setup_fstrim
 setup_groups
+setup_fish_shell
 reconfigure_kernel
 
 #Ofimatica
