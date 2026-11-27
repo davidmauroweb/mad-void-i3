@@ -289,7 +289,7 @@ base_pkgs=(
 	network-manager-applet xorg xinit elogind lxdm pluma xarchiver octoxbps xtools
 	polkit-gnome
 	i3-gaps i3blocks i3lock i3status rofi dunst ImageMagick feh font-awesome6
-	noto-fonts-ttf clearine alsa-utils pipewire pipewire-pulse wireplumber
+	noto-fonts-ttf clearine alsa-utils pipewire wireplumber
 	alsa-pipewire libspa-bluetooth pamixer bluez pavucontrol upower picom playerctl
 	xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot
 	gtk-theme-united-gnome st sysstat alacritty ntp fish
