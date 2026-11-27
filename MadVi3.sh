@@ -292,7 +292,7 @@ base_pkgs=(
 	noto-fonts-ttf clearine alsa-utils pipewire wireplumber
 	alsa-pipewire libspa-bluetooth pamixer bluez pavucontrol upower picom playerctl
 	xterm lxappearance pcmanfm xautolock papirus-icon-theme scrot
-	gtk-theme-united-gnome st sysstat alacritty ntp fish
+	gtk-theme-united-gnome st sysstat alacritty ntp fish-shell
 )
 
 if ! sudo xbps-install -y "${base_pkgs[@]}"; then
@@ -321,7 +321,7 @@ echo "1. Abiword + Gnumeric"
 echo "2. Libreoffice"
 echo "3. Sin Paquetes de Oficina"
 read o
-spell="aspell hunspell-es_ES"
+spell="aspell hunspell-es"
 case $o in
 	1)
 		o="abiword gnumeric $spell"
@@ -340,7 +340,7 @@ echo "Navegadores"
 echo "-------------------"
 echo "1. Firefox - recomendado"
 echo "2. Chromium"
-echo "3. Midori"
+echo "3. Epiphany (navegador web simple)"
 echo "4. Dillo (navegador gráfico minimalista)"
 read w
 case $w in
@@ -352,7 +352,7 @@ case $w in
 		w="chromium"
 		;;
 	3)
-		w="midori"
+		w="epiphany"
 		;;
 	4)
 		w="dillo"
